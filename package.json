@@ -16,8 +16,7 @@
     "build": "react-scripts-ts build",
     "test": "react-scripts-ts test --env=jsdom",
     "eject": "react-scripts-ts eject",
-    "lint": "eslint -c './.eslintrc' --fix './src/**/*{.ts,.tsx}'",
-    "postinstall": "rm -f node_modules/web3/index.d.ts"
+    "lint": "eslint -c './.eslintrc' --fix './src/**/*{.ts,.tsx}'"
   },
   "repository": {
     "type": "git",
@@ -27,8 +26,7 @@
     "url": "https://github.com/walletconnect/walletconnect-example-dapp/issues"
   },
   "dependencies": {
-    "@walletconnect/client": "^1.2.1",
-    "@walletconnect/qrcode-modal": "^1.2.1",
+    "@walletconnect/utils": "^1.2.2",
     "@walletconnect/web3-provider": "^1.2.2",
     "axios": "^0.19.2",
     "bignumber.js": "^9.0.0",

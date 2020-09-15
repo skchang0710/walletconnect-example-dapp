@@ -18,7 +18,7 @@ import AccountAssets from "./components/AccountAssets";
 import Web3 from "web3";
 
 let web3: Web3;
-let provider: WalletConnectProvider;
+let provider: any;
 
 const SLayout = styled.div`
   position: relative;
