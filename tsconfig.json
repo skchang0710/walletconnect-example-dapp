@@ -20,7 +20,11 @@
     "suppressImplicitAnyIndexErrors": true,
     "noUnusedLocals": true,
     "resolveJsonModule": true,
-    "types": ["react", "jest"]
+    "types": ["react", "jest"],
+		"typeRoots": [
+      "./node_modules/@types/",
+      "./typings/"
+    ]
   },
   "exclude": [
     "node_modules",
