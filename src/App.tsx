@@ -356,6 +356,81 @@ class App extends React.Component<any, any> {
     }
   };
 
+  public testSignTransaction = async () => {
+    const { connector, address, chainId } = this.state;
+
+    if (!connector) {
+      return;
+    }
+
+    // from
+    const from = address;
+
+    // to
+    const to = address;
+
+    // nonce
+    const _nonce = await apiGetAccountNonce(address, chainId);
+    const nonce = sanitizeHex(convertStringToHex(_nonce));
+
+    // gasPrice
+    const gasPrices = await apiGetGasPrices();
+    const _gasPrice = gasPrices.slow.price;
+    const gasPrice = sanitizeHex(convertStringToHex(convertAmountToRawNumber(_gasPrice, 9)));
+
+    // gasLimit
+    const _gasLimit = 21000;
+    const gasLimit = sanitizeHex(convertStringToHex(_gasLimit));
+
+    // value
+    const _value = 0;
+    const value = sanitizeHex(convertStringToHex(_value));
+
+    // data
+    const data = "0x";
+
+    // test transaction
+    const tx = {
+      from,
+      to,
+      nonce,
+      gasPrice,
+      gasLimit,
+      value,
+      data,
+    };
+
+    console.log("tx :", tx);
+
+    try {
+      // open modal
+      this.toggleModal();
+
+      // toggle pending request indicator
+      this.setState({ pendingRequest: true });
+
+      // sign transaction
+      const signedTransaction = await connector.signTransaction(tx);
+      console.log("signedTransaction :", signedTransaction);
+
+      // format displayed result
+      const formattedResult = {
+        method: "eth_signTransaction",
+        signedTransaction,
+      };
+
+      // display result
+      this.setState({
+        connector,
+        pendingRequest: false,
+        result: formattedResult || null,
+      });
+    } catch (error) {
+      console.error(error);
+      this.setState({ connector, pendingRequest: false, result: null });
+    }
+  };
+
   public testSignPersonalMessage = async () => {
     const { connector, address, chainId } = this.state;
 
@@ -494,6 +569,10 @@ class App extends React.Component<any, any> {
                   <STestButtonContainer>
                     <STestButton left onClick={this.testSendTransaction}>
                       {"eth_sendTransaction"}
+                    </STestButton>
+
+                    <STestButton left onClick={this.testSignTransaction}>
+                      {"eth_signTransaction"}
                     </STestButton>
 
                     <STestButton left onClick={this.testSignPersonalMessage}>
