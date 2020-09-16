@@ -17,9 +17,6 @@ import Banner from "./components/Banner";
 import AccountAssets from "./components/AccountAssets";
 import Web3 from "web3";
 
-let web3: Web3;
-let provider: any;
-
 const SLayout = styled.div`
   position: relative;
   width: 100%;
@@ -130,7 +127,6 @@ interface IAppState {
   showModal: boolean;
   pendingRequest: boolean;
   uri: string;
-  accounts: string[];
   address: string;
   result: any | null;
   assets: IAssetData[];
@@ -143,11 +139,13 @@ const INITIAL_STATE: IAppState = {
   showModal: false,
   pendingRequest: false,
   uri: "",
-  accounts: [],
   address: "",
   result: null,
   assets: [],
 };
+
+let web3: Web3;
+let provider: any;
 
 class App extends React.Component<any, any> {
   public state: IAppState = {
@@ -160,15 +158,16 @@ class App extends React.Component<any, any> {
 
     //  Create WalletConnect Provider
     provider = new WalletConnectProvider({
-      infuraId: "27e484dcd9e3efcfd25a83a78777cdf1", // Required
+      infuraId: "cbc3aeaa42454c1cb5182d71376c0872", // Required
     });
-    await provider.enable();
+
     web3 = new Web3(provider);
+    console.log("web3 :", web3);
 
     provider.on("accountsChanged", async (accounts: string[]) => {
       console.log("accounts :", accounts);
       const address = accounts[0];
-      await this.setState({ accounts, address });
+      await this.setState({ address });
       await this.getAccountAssets();
     });
 
@@ -186,6 +185,10 @@ class App extends React.Component<any, any> {
       console.log(code, reason);
       await this.setState({ ...INITIAL_STATE });
     });
+
+    console.log("Before provider.enable");
+    // await provider.disconnect();
+    provider.enable();
   };
 
   public killSession = async () => {
@@ -198,6 +201,7 @@ class App extends React.Component<any, any> {
     try {
       // get account balances
       const assets = await apiGetAccountAssets(address, chainId);
+      console.log("assets :", assets);
 
       await this.setState({ fetching: false, address, assets });
     } catch (error) {
