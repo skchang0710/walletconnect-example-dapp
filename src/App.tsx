@@ -9,9 +9,8 @@ import Modal from "./components/Modal";
 import Header from "./components/Header";
 import Loader from "./components/Loader";
 import { fonts } from "./styles";
-import { apiGetAccountAssets, apiGetGasPrices, apiGetAccountNonce } from "./helpers/api";
 import { sanitizeHex, verifySignature, hashPersonalMessage } from "./helpers/utilities";
-import { convertAmountToRawNumber, convertStringToHex } from "./helpers/bignumber";
+import { convertStringToHex } from "./helpers/bignumber";
 import { IAssetData } from "./helpers/types";
 import Banner from "./components/Banner";
 import AccountAssets from "./components/AccountAssets";
@@ -153,9 +152,6 @@ class App extends React.Component<any, any> {
   };
 
   public walletConnectInit = async () => {
-    // bridge url
-    // const bridge = "https://bridge.walletconnect.org";
-
     //  Create WalletConnect Provider
     provider = new WalletConnectProvider({
       infuraId: "cbc3aeaa42454c1cb5182d71376c0872", // Required
@@ -165,14 +161,14 @@ class App extends React.Component<any, any> {
     console.log("web3 :", web3);
 
     provider.on("accountsChanged", async (accounts: string[]) => {
-      console.log("accounts :", accounts);
+      console.log("accountsChanged :", accounts);
       const address = accounts[0];
       await this.setState({ address });
       await this.getAccountAssets();
     });
 
     provider.on("chainChanged", async (chainId: number) => {
-      console.log("chainId :", chainId);
+      console.log("chainChanged :", chainId);
       await this.setState({ chainId });
       await this.getAccountAssets();
     });
@@ -187,8 +183,12 @@ class App extends React.Component<any, any> {
     });
 
     console.log("Before provider.enable");
-    // await provider.disconnect();
-    provider.enable();
+    console.log("provider :", provider);
+    if (!(provider.accounts.length === 0)) {
+      await provider.disconnect();
+    }
+    await provider.enable();
+    console.log("provider :", provider);
   };
 
   public killSession = async () => {
@@ -196,14 +196,21 @@ class App extends React.Component<any, any> {
   };
 
   public getAccountAssets = async () => {
-    const { address, chainId } = this.state;
+    const { address } = this.state;
     this.setState({ fetching: true });
     try {
       // get account balances
-      const assets = await apiGetAccountAssets(address, chainId);
-      console.log("assets :", assets);
+      const balance = await web3.eth.getBalance(address);
+      const asset = {
+        symbol: "ETH",
+        name: "Ether",
+        decimals: "18",
+        contractAddress: "",
+        balance,
+      };
+      console.log("asset :", asset);
 
-      await this.setState({ fetching: false, address, assets });
+      await this.setState({ fetching: false, address, assets: [asset] });
     } catch (error) {
       console.error(error);
       await this.setState({ fetching: false });
@@ -213,7 +220,7 @@ class App extends React.Component<any, any> {
   public toggleModal = () => this.setState({ showModal: !this.state.showModal });
 
   public testSendTransaction = async () => {
-    const { address, chainId } = this.state;
+    const { address } = this.state;
 
     if (!web3) {
       return;
@@ -226,15 +233,11 @@ class App extends React.Component<any, any> {
     const to = address;
 
     // nonce
-    const _nonce = await apiGetAccountNonce(address, chainId);
-    console.log("_nonce :", _nonce);
-    // const nonce = sanitizeHex(convertStringToHex(_nonce));
-    const nonce = parseInt(_nonce, 10);
+    const nonce = await web3.eth.getTransactionCount(address);
+    console.log("nonce :", nonce);
 
     // gasPrice
-    const gasPrices = await apiGetGasPrices();
-    const _gasPrice = gasPrices.slow.price;
-    const gasPrice = sanitizeHex(convertStringToHex(convertAmountToRawNumber(_gasPrice, 9)));
+    const gasPrice = await web3.eth.getGasPrice();
 
     // gasLimit
     const _gasLimit = 21000;
@@ -289,7 +292,7 @@ class App extends React.Component<any, any> {
   };
 
   public testSignTransaction = async () => {
-    const { address, chainId } = this.state;
+    const { address } = this.state;
 
     if (!web3) {
       return;
@@ -302,15 +305,11 @@ class App extends React.Component<any, any> {
     const to = address;
 
     // nonce
-    const _nonce = await apiGetAccountNonce(address, chainId);
-    console.log("_nonce :", _nonce);
-    // const nonce = sanitizeHex(convertStringToHex(_nonce));
-    const nonce = parseInt(_nonce, 10);
+    const nonce = await web3.eth.getTransactionCount(address);
+    console.log("nonce :", nonce);
 
     // gasPrice
-    const gasPrices = await apiGetGasPrices();
-    const _gasPrice = gasPrices.slow.price;
-    const gasPrice = sanitizeHex(convertStringToHex(convertAmountToRawNumber(_gasPrice, 9)));
+    const gasPrice = await web3.eth.getGasPrice();
 
     // gasLimit
     const _gasLimit = 21000;
