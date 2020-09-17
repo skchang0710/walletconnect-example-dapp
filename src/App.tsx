@@ -121,7 +121,6 @@ const STestButton = styled(Button as any)`
 
 interface IAppState {
   fetching: boolean;
-  connected: boolean;
   chainId: number;
   showModal: boolean;
   pendingRequest: boolean;
@@ -133,7 +132,6 @@ interface IAppState {
 
 const INITIAL_STATE: IAppState = {
   fetching: false,
-  connected: false,
   chainId: 1,
   showModal: false,
   pendingRequest: false,
@@ -182,13 +180,7 @@ class App extends React.Component<any, any> {
       await this.setState({ ...INITIAL_STATE });
     });
 
-    console.log("Before provider.enable");
-    console.log("provider :", provider);
-    if (!(provider.accounts.length === 0)) {
-      await provider.disconnect();
-    }
-    await provider.enable();
-    console.log("provider :", provider);
+    provider.enable();
   };
 
   public killSession = async () => {
@@ -238,6 +230,7 @@ class App extends React.Component<any, any> {
 
     // gasPrice
     const gasPrice = await web3.eth.getGasPrice();
+    console.log("gasPrice :", gasPrice);
 
     // gasLimit
     const _gasLimit = 21000;
@@ -310,6 +303,7 @@ class App extends React.Component<any, any> {
 
     // gasPrice
     const gasPrice = await web3.eth.getGasPrice();
+    console.log("gasPrice :", gasPrice);
 
     // gasLimit
     const _gasLimit = 21000;
@@ -410,21 +404,12 @@ class App extends React.Component<any, any> {
   };
 
   public render = () => {
-    const {
-      assets,
-      address,
-      connected,
-      chainId,
-      fetching,
-      showModal,
-      pendingRequest,
-      result,
-    } = this.state;
+    const { assets, address, chainId, fetching, showModal, pendingRequest, result } = this.state;
     return (
       <SLayout>
         <Column maxWidth={1000} spanHeight>
           <Header
-            connected={connected}
+            connected={provider ? provider.connected : false}
             address={address}
             chainId={chainId}
             killSession={this.killSession}
