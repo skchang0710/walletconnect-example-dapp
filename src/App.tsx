@@ -1,6 +1,5 @@
 import * as React from "react";
 import styled from "styled-components";
-import { convertUtf8ToHex } from "@walletconnect/utils";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import Button from "./components/Button";
 import Column from "./components/Column";
@@ -367,9 +366,6 @@ class App extends React.Component<any, any> {
     // test message
     const message = "My email is john@doe.com - 1537836206101";
 
-    // encode message (hex)
-    const hexMsg = convertUtf8ToHex(message);
-
     try {
       // open modal
       this.toggleModal();
@@ -378,7 +374,7 @@ class App extends React.Component<any, any> {
       this.setState({ pendingRequest: true });
 
       // send message
-      const result = await web3.eth.sign(hexMsg, address);
+      const result = await web3.eth.personal.sign(message, address, "");
 
       // verify signature
       const hash = hashPersonalMessage(message);
